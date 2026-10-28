@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Result Organizer</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%237C3AED'/%3E%3Cpath d='M18 10H38L49 21V45C49 47 47 49 45 49H18C16 49 14 47 14 45V14C14 12 16 10 18 10Z' fill='white'/%3E%3Cpath d='M38 10V21H49' fill='%23EDE9FE'/%3E%3Cpath d='M21 27H39M21 33H36M21 39H30' stroke='%237C3AED' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='45' cy='45' r='15' fill='%2318A874' stroke='white' stroke-width='2.5'/%3E%3Cpath d='M38 45L43 50L52 40' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#182532;background:#eef2f6}*{box-sizing:border-box}
+body{margin:0;padding:24px}.wrap{max-width:1120px;margin:auto}h1{margin:0 0 6px;font-size:26px}.muted{color:#667585}.layout{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(400px,1.1fr);gap:20px;align-items:start}
+.panel{background:#fff;border:1px solid #d9e1e8;border-radius:14px;padding:20px;box-shadow:0 6px 24px #17212b0a}h2{font-size:18px;margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5df;border-radius:8px;font:inherit;background:#fff;color:#182532}textarea{min-height:150px;resize:vertical}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}button{border:0;border-radius:8px;padding:11px 15px;font-size:13px;font-weight:700;cursor:pointer;background:#174f86;color:white}button.secondary{background:#e9eff5;color:#203243}button.print{background:#176b4d}button.pdf{background:#7d3c98}.hint{font-size:12px;line-height:1.5;color:#667585}.message{margin-top:12px;padding:11px;border-radius:8px;background:#fff8e8;border:1px solid #f0dfb7;font-size:13px}
+.preview-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.preview-title h2{margin:0}
+.receipt{background:#fff;color:#182532;border:1px solid #d4dce4;border-radius:2px;padding:30px;min-height:700px}
+.receipt-head{text-align:center;border-bottom:2px solid #244b6a;padding-bottom:16px;margin-bottom:20px}
+.shop{font-size:22px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}.doc-title{font-size:17px;font-weight:800;letter-spacing:1.3px;margin-top:12px;color:#244b6a}.doc-subtitle{font-size:11px;color:#647586;margin-top:5px}
+.info-heading{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#244b6a;margin:18px 0 8px}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.detail{padding:10px 0;border-bottom:1px solid #e1e7ed;min-height:51px}.detail span{display:block;color:#697989;font-size:10px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}.detail strong{font-size:13px;overflow-wrap:anywhere}
+.resultbox{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.resultcell{border:1px solid #d9e3eb;padding:14px;text-align:center;border-radius:8px;background:#f7f9fb}.resultcell span{display:block;font-size:10px;color:#637486;text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}.resultcell strong{font-size:23px;color:#244b6a}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}thead{display:table-header-group}th{background:#edf3f7;color:#244b6a;text-transform:uppercase;letter-spacing:.4px;font-size:10px}th,td{padding:10px 12px;border:1px solid #dce4eb;text-align:left}tbody tr:nth-child(even){background:#fafbfd}td:first-child,th:first-child{width:48px;text-align:center}td:nth-child(2),th:nth-child(2){text-align:center}td:last-child,th:last-child{width:100px;text-align:center}
+.disclaimer{border:1px solid #c4d0db;padding:10px;text-align:center;font-size:10px;font-weight:800;letter-spacing:.4px;margin-top:20px;color:#33495a}
+.foot{font-size:10px;line-height:1.5;color:#667585;margin-top:12px}.footerline{border-top:1px solid #dce4eb;margin-top:24px;padding-top:10px;display:flex;justify-content:space-between;gap:12px;font-size:9px;color:#7a8793}
+@media(max-width:900px){.layout{grid-template-columns:1fr}body{padding:12px}.receipt{padding:20px}}
+@media print{
+ @page{size:A4;margin:12mm}
+ html,body{background:#fff!important;margin:0!important;padding:0!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .no-print,h1,.page-sub,.layout>.panel:first-child,.preview-title{display:none!important}
+ .wrap,.layout,.layout>.panel{display:block!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important}
+ .receipt{border:0!important;border-radius:0!important;padding:0!important;min-height:0!important;width:100%!important;color:#000!important}.receipt *{color:#000!important;box-shadow:none!important}.detail span,.doc-subtitle,.foot,.footerline,.resultcell span{color:#000!important}
+ .receipt-head{margin-bottom:15px;padding-bottom:12px}.shop{font-size:20px}.doc-title{font-size:15px}
+ .info-heading{margin:13px 0 5px}.detail{min-height:44px;padding:8px 0}.detail strong{font-size:12px}
+ .resultbox{margin:14px 0}.resultcell{padding:10px}
+ table{font-size:11px}th,td{padding:7px 9px}
+ .disclaimer{margin-top:14px}.footerline{margin-top:17px}
+ tr{break-inside:avoid}table{break-inside:auto}
+}
+
+/* Modern UI layer. Original application logic remains intact. */
+:root {
+  color-scheme: light;
+  --ui-bg: #f3f5fb;
+  --ui-panel: #ffffff;
+  --ui-input: #f9faff;
+  --ui-text: #172033;
+  --ui-muted: #68758a;
+  --ui-border: #e0e6f0;
+  --ui-accent: #6d3be8;
+  --ui-accent-soft: #f0ebff;
+  --ui-shadow: 0 14px 40px rgba(28, 37, 67, .08);
+}
+html { background: var(--ui-bg); }
+body {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  line-height: 1.45;
+  transition: background .2s ease, color .2s ease;
+}
+.wrap { max-width: 1240px; }
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+  padding: 5px 0 17px;
+  border-bottom: 1px solid var(--ui-border);
+}
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  background: linear-gradient(145deg, #8b5cf6, #5b21b6);
+  box-shadow: 0 9px 22px rgba(109, 59, 232, .24);
+}
+.brand-mark svg { width: 28px; height: 28px; }
+.brand-copy { min-width: 0; flex: 1; }
+.brand-copy h1 { margin: 0; }
+.brand-copy .page-sub { margin: 6px 0 0; }
+.formatter-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  flex: 0 0 auto; padding: 11px 15px; border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff;
+  text-decoration: none; font-size: 13px; font-weight: 750;
+  box-shadow: 0 7px 18px rgba(109, 59, 232, .18);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.formatter-link:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(109, 59, 232, .24); }
+.formatter-link svg { width: 17px; height: 17px; flex: 0 0 auto; }
+
+.wrap > .no-print:first-child {
+  position: relative;
+  padding: 4px 64px 8px 0;
+  margin-bottom: 20px;
+}
+h1 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -.8px; color: var(--ui-text); }
+.page-sub { margin-top: 7px; font-size: 14px; }
+.muted, .hint { color: var(--ui-muted); }
+.panel {
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--ui-shadow);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+h2 { color: var(--ui-text); letter-spacing: -.25px; }
+label { color: var(--ui-text); font-size: 12px; letter-spacing: .1px; }
+input, select, textarea {
+  background: var(--ui-input);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+  border-radius: 11px;
+  min-height: 43px;
+  transition: border-color .15s ease, box-shadow .15s ease, background .2s ease;
+}
+textarea { min-height: 155px; line-height: 1.55; }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 18%, transparent);
+}
+button {
+  border-radius: 11px;
+  background: #6d3be8;
+  box-shadow: 0 4px 12px rgba(109, 59, 232, .14);
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+}
+button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button.secondary {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
+  box-shadow: none;
+}
+button.print { background: #13845d; }
+button.pdf { background: #873bc0; }
+.message {
+  background: #fff8e8;
+  border: 1px solid #f0dfb7;
+  color: #684a0b;
+  border-radius: 11px;
+  line-height: 1.5;
+}
+.preview-title { margin-bottom: 17px; }
+.receipt {
+  background: #fff;
+  color: #182532;
+  border: 1px solid #d4dce4;
+  border-radius: 12px;
+  padding: clamp(18px, 3vw, 32px);
+  box-shadow: 0 5px 20px rgba(23, 37, 50, .04);
+}
+.receipt-head { border-bottom-color: #244b6a; }
+.resultcell { border-radius: 11px; }
+.disclaimer { border-radius: 7px; }
+@media(max-width:900px) {
+  .panel { padding: 19px; border-radius: 17px; }
+  .wrap > .no-print:first-child { margin-bottom: 15px; }
+}
+@media(max-width:480px) {
+  body { padding: 16px 12px; }
+  /* Mobile-only header fix: give the title and description the full available width. */
+  .topbar {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: start;
+    gap: 11px;
+    padding-bottom: 14px;
+  }
+  .brand-mark { width: 46px; height: 46px; border-radius: 14px; }
+  .brand-mark svg { width: 25px; height: 25px; }
+  .brand-copy { min-width: 0; width: 100%; }
+  .brand-copy h1 { font-size: 22px; }
+  .brand-copy .page-sub { overflow-wrap: normal; word-break: normal; }
+  .formatter-link { grid-column: 2; justify-self: start; margin-left: 0; padding: 9px 12px; }
+  .panel { padding: 16px; }
+  .actions button { flex: 1 1 auto; }
+}
+
+/* Field-label and action-button SVG polish; application logic is unchanged. */
+label{display:flex;align-items:center;gap:7px;}
+.label-icon{width:15px;height:15px;flex:0 0 15px;color:var(--ui-accent);}
+button{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.button-icon{width:16px;height:16px;flex:0 0 16px;stroke:currentColor;}
+button:focus-visible,.formatter-link:focus-visible{outline:3px solid color-mix(in srgb,var(--ui-accent) 38%,transparent);outline-offset:3px;}
+@media(max-width:480px){.actions button{gap:6px;padding-left:10px;padding-right:10px}.button-icon{width:15px;height:15px;flex-basis:15px}}
+
+</style></head>
+<body><div class="wrap">
+<header class="topbar no-print">
+  <div class="brand-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20z"/>
+      <path d="M14 4v4h4M9 12h6M9 15.5h6"/>
+      <path d="M15.5 18.5h3.2a2.3 2.3 0 0 0 0-4.6h-1.1"/>
+      <path d="m15.5 18.5 1.6-1.6"/>
+    </svg>
+  </div>
+  <div class="brand-copy">
+    <h1>Result Organizer</h1>
+    <p class="muted page-sub">Organize SMS results and print.</p>
+  </div>
+  <a class="formatter-link" href="sms-result-formatter.html" aria-label="Open Result SMS Formatter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/>
+      <path d="M8 12h8M8 15h5"/>
+    </svg>
+    <span>SMS Formatter</span>
+  </a>
+</header>
+<div class="layout">
+<section class="panel no-print">
+<h2>SMS input</h2><label for="sms"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h4M10 12h5M10 16h5"/></svg>Full SMS response</label><textarea id="sms" placeholder="Paste the complete result SMS here..."></textarea>
+<div class="actions"><button id="parse"><svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Organize SMS</button><button id="example" class="secondary" type="button"><svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Load sample</button><button id="clear" class="secondary" type="button"><svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg>Clear</button></div>
+<div class="message" id="message" role="status">Exam type is detected from the SMS. Check all fields before printing.</div>
+<h2 style="margin-top:24px">Review extracted details</h2>
+<label for="shop"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-6h6v6"/></svg>Shop / studio name</label><input id="shop" value="COMPUTER STUDIO" maxlength="80">
+<label for="name"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Student name</label><input id="name" placeholder="Student name">
+<div class="grid2"><div><label for="exam"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg>Examination</label><select id="exam"><option>SSC</option><option>HSC</option><option>Dakhil</option><option>Alim</option><option>Equivalent</option></select></div><div><label for="year"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Exam year (if known)</label><input id="year" inputmode="numeric" maxlength="4" placeholder="e.g. 2026"></div></div>
+<div class="grid2"><div><label for="board"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 11h1M14 11h1M9 15h1M14 15h1"/></svg>Board</label><input id="board" placeholder="e.g. DINAJPUR"></div><div><label for="roll"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2"/></svg>Roll number</label><input id="roll" inputmode="numeric" placeholder="Roll"></div></div>
+<div class="grid2"><div><label for="result"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>Result status</label><select id="result"><option value="NOT VERIFIED">NOT VERIFIED</option><option value="PASSED">PASSED</option><option value="FAILED">FAILED</option></select></div><div><label for="gpa"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg>GPA</label><input id="gpa" inputmode="decimal" placeholder="e.g. 4.00"></div></div>
+<label for="reg"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>Registration number (if available)</label><input id="reg" placeholder="Not present unless in SMS">
+<label for="verify"><svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 11 2 2 4-4"/></svg>Verification status</label><select id="verify"><option>SMS parsed; operator must verify</option><option>Checked by operator against original SMS</option><option>Confirmed against official source</option></select>
+<p class="hint">Subject codes and grades are shown as received. Subject names and numeric marks are not inferred.</p>
+<div class="actions"><button id="printBtn" class="print" type="button"><svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>Print</button><button id="pdfBtn" class="pdf" type="button"><svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l4 4v14H6V3zM14 3v5h5M8 14h8M8 17h6"/></svg>Save as PDF</button></div>
+<p class="hint">Print opens the print dialog. Save as PDF directly downloads an A4 PDF image of the same layout.</p>
+</section>
+<section class="panel">
+<div class="preview-title no-print"><h2>Print preview</h2><span class="muted" style="font-size:12px">A4 layout</span></div>
+<div class="receipt" id="receipt">
+<div class="receipt-head"><div class="shop" id="pShop">YOUR COMPUTER STUDIO</div><div class="doc-title" id="pTitle">SSC RESULT SUMMARY</div><div class="doc-subtitle">Student result details organized from SMS response</div></div>
+<div class="info-heading">Student information</div>
+<div class="details">
+<div class="detail"><span>Student name</span><strong id="pName">—</strong></div><div class="detail"><span>Examination / Year</span><strong id="pExamYear">SSC / Year not entered</strong></div>
+<div class="detail"><span>Education board</span><strong id="pBoard">—</strong></div><div class="detail"><span>Roll number</span><strong id="pRoll">—</strong></div>
+<div class="detail"><span>Registration number</span><strong id="pReg">Not provided</strong></div><div class="detail"><span>Result source</span><strong>SMS response</strong></div>
+</div>
+<div class="resultbox"><div class="resultcell"><span>Result status</span><strong id="pResult">NOT VERIFIED</strong></div><div class="resultcell"><span>Grade point average</span><strong id="pGpa">Not available</strong></div></div>
+<div class="info-heading">Subject-wise grades</div>
+<table><thead><tr><th>No.</th><th>Subject code</th><th>Grade</th></tr></thead><tbody id="subjects"><tr><td colspan="3">No subject grades extracted yet.</td></tr></tbody></table>
+<div class="disclaimer">UNOFFICIAL RESULT SUMMARY - NOT AN ORIGINAL EDUCATION BOARD MARKSHEET</div>
+<div class="foot">This summary is based on SMS text entered by the operator. Subject codes and grades are shown as extracted; subject names and numeric marks are not provided by this receipt. Verify the details against the original SMS and official sources where available.</div>
+<div class="footerline"><span id="pVerify">SMS parsed; operator must verify</span><span>Generated by SMS Result Organizer</span></div>
+</div></section></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const sample="MD. SATTAR ALI; SSC BOARD: DINAJPUR; ROLL: 275512; RESULT: PASSED; GPA: 4.00; LTRGD: 101:A- ,107:A,109:A+ ,150:B ,111:A ,136:B,137:A- ,138:A ,154:A+,134:B.";
+function msg(t){$("message").textContent=t}function txt(id,v){$(id).textContent=v||"—"}
+function renderSubjects(items){const b=$("subjects");b.replaceChildren();if(!items.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=3;td.textContent="No subject grades extracted yet.";tr.append(td);b.append(tr);return}items.forEach((x,i)=>{const tr=document.createElement("tr");[String(i+1),x.code,x.grade].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td)});b.append(tr)})}
+function update(){txt("pShop",$("shop").value.trim()||"YOUR COMPUTER STUDIO");txt("pName",$("name").value.trim());txt("pTitle",$("exam").value+" RESULT SUMMARY");txt("pExamYear",$("exam").value+($("year").value.trim()?" / "+$("year").value.trim():" / Year not entered"));txt("pBoard",$("board").value.trim());txt("pRoll",$("roll").value.trim());txt("pReg",$("reg").value.trim()?"••••"+$("reg").value.trim().slice(-4):"Not provided");txt("pResult",$("result").value);txt("pGpa",$("gpa").value.trim()||"Not available");txt("pVerify",$("verify").selectedOptions[0].textContent)}
+function parseSMS(){const s=$("sms").value.trim();if(!s){msg("Paste the SMS first.");return}let m=s.match(/\b(SSC|HSC|DAKHIL|ALIM|EQUIVALENT)\s+BOARD\s*:/i);if(m){const v=m[1].toUpperCase();$("exam").value=["SSC","HSC","DAKHIL","ALIM","EQUIVALENT"].includes(v)?v:"Equivalent"}m=s.match(/^\s*(.+?)\s*;\s*(?=(?:SSC|HSC|Dakhil|Alim|Equivalent)\s+BOARD\s*:)/i);if(m)$("name").value=m[1].trim();m=s.match(/\b(?:SSC|HSC|DAKHIL|ALIM|EQUIVALENT)\s+BOARD\s*:\s*([^;,.]+)/i);if(m)$("board").value=m[1].trim().toUpperCase();m=s.match(/\bROLL\s*:\s*([A-Z0-9-]+)/i);if(m)$("roll").value=m[1].trim();m=s.match(/\bRESULT\s*:\s*(PASSED|PASS|FAILED|FAIL)\b/i);if(m){const r=m[1].toUpperCase();$("result").value=(r==="PASS"||r==="PASSED")?"PASSED":"FAILED"}m=s.match(/\bG\.?P\.?A\.?\s*:\s*([0-5](?:\.\d{1,2})?)\b/i);if(m)$("gpa").value=m[1];const grades=[];const l=s.match(/\bLTRGD\s*:\s*(.*?)(?:;|$)/i);if(l){const re=/(?:^|[,;\s])(\d{2,4})\s*:\s*(A\+|A-|A|B|C|D|F)\b/gi;let g;while((g=re.exec(l[1]))!==null)grades.push({code:g[1],grade:g[2].toUpperCase()})}renderSubjects(grades);update();msg("Detected exam: "+$("exam").value+". Extracted "+grades.length+" subject-grade entries. Verify all details before printing.")}
+$("parse").addEventListener("click",parseSMS);$("example").addEventListener("click",()=>{$("sms").value=sample;parseSMS()});$("clear").addEventListener("click",()=>{if(!confirm("Clear all student details?"))return;["sms","name","board","roll","gpa","reg"].forEach(id=>$(id).value="");$("exam").value="SSC";$("result").value="NOT VERIFIED";$("verify").selectedIndex=0;renderSubjects([]);update();msg("Cleared. Paste the next SMS.")});
+function validateBeforeOutput(){
+ update();
+ if(!$("name").value.trim()||!$("roll").value.trim()||!$("board").value.trim()){
+   if(!confirm("Name, board or roll is missing. Continue?"))return false;
+ }
+ if($("result").value==="NOT VERIFIED"&&!confirm("Result is marked NOT VERIFIED. Continue?"))return false;
+ return true;
+}
+function doPrint(){if(!validateBeforeOutput())return;window.print()}
+async function makeDirectPDF(){
+ if(!validateBeforeOutput())return;
+ if(!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF){
+   alert("PDF export needs an internet connection to load its PDF libraries. Connect to the internet and try again.");
+   return;
+ }
+ const button=$("pdfBtn"), oldText=button.textContent;
+ button.disabled=true;button.textContent="Creating PDF...";
+ let clone, holder;
+ try{
+   // Create an off-screen A4-width clone that uses the same receipt markup and print styles.
+   // This avoids capturing the narrow on-screen preview card.
+   holder=document.createElement("div");
+   // Use the same A4 print media rules and receipt width as the Print receipt output.
+   holder.style.cssText="position:fixed;left:-10000px;top:0;width:186mm;background:#fff;z-index:-1;color:#000;";
+   clone=$("receipt").cloneNode(true);
+   clone.style.cssText="width:100%;max-width:none;min-height:0;margin:0;padding:0;border:0;border-radius:0;background:#fff;color:#000;box-shadow:none;";
+   clone.querySelectorAll("*").forEach(el=>{
+     el.style.setProperty("color","#000000","important");
+     el.style.setProperty("text-shadow","none","important");
+   });
+   clone.querySelectorAll("*").forEach(el=>{
+     el.style.setProperty("print-color-adjust","exact","important");
+     el.style.setProperty("-webkit-print-color-adjust","exact","important");
+   });
+   holder.appendChild(clone);document.body.appendChild(holder);
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   const canvas=await window.html2canvas(clone,{scale:3,backgroundColor:"#ffffff",useCORS:true,logging:false,windowWidth:Math.max(clone.scrollWidth,700)});
+   const {jsPDF}=window.jspdf;
+   const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
+   const pageW=210,pageH=297,marginX=14,marginY=14;
+   const maxW=pageW-2*marginX,maxH=pageH-2*marginY;
+   const imgW=maxW,imgH=canvas.height*imgW/canvas.width;
+   const imgData=canvas.toDataURL("image/png");
+   // Match print's page margins and preserve the receipt size unless content must fit.
+   const scale=Math.min(1,maxH/imgH);
+   const finalW=imgW*scale,finalH=imgH*scale;
+   pdf.addImage(imgData,"PNG",(pageW-finalW)/2,marginY,finalW,finalH,undefined,"FAST");
+   const safeRoll=($("roll").value.trim()||"receipt").replace(/[^A-Za-z0-9_-]/g,"");
+   pdf.save(($("exam").value||"Result")+"-Result-"+safeRoll+".pdf");
+ }catch(e){alert("PDF export failed: "+e.message)}
+ finally{if(holder)holder.remove();button.disabled=false;button.textContent=oldText}
+}
+$("printBtn").addEventListener("click",()=>{try{doPrint()}catch(e){alert("Print failed: "+e.message)}});
+$("pdfBtn").addEventListener("click",()=>{try{makeDirectPDF()}catch(e){alert("PDF export failed. Please try again or use Print receipt and choose Save as PDF. Details: "+e.message)}});
+// Persist the shop/studio name and exam year in this browser. Clearing site data may remove them.
+const SHOP_STORAGE_KEY = "smsResultOrganizer.shopName";
+const YEAR_STORAGE_KEY = "smsResultOrganizer.examYear";
+try {
+  const savedShopName = localStorage.getItem(SHOP_STORAGE_KEY);
+  if (savedShopName !== null) $("shop").value = savedShopName;
+  const savedExamYear = localStorage.getItem(YEAR_STORAGE_KEY);
+  if (savedExamYear !== null) $("year").value = savedExamYear;
+} catch (e) {}
+$("shop").addEventListener("input", () => {
+  try { localStorage.setItem(SHOP_STORAGE_KEY, $("shop").value); } catch (e) {}
+});
+$("year").addEventListener("input", () => {
+  try { localStorage.setItem(YEAR_STORAGE_KEY, $("year").value); } catch (e) {}
+});
+["shop","name","exam","year","board","roll","result","gpa","reg","verify"].forEach(id=>{ $(id).addEventListener("input",update);$(id).addEventListener("change",update)});update();
+</script>
+<script defer src="https://resultorganizer-counter.mshare.workers.dev/tracker.js"></script>
+
+</body></html>
